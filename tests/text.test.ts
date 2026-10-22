@@ -12,6 +12,7 @@ const usage = {
         usage_used: 8000,
         usage_max: 10000,
         unit: "profiles",
+        period_start: "2026-10-01T00:00:00Z",
         period_end: "2026-11-01T00:00:00Z",
         as_of: "2026-10-22T06:00:00Z",
       },
@@ -40,6 +41,23 @@ describe("usageText", () => {
     expect(text).toContain("8,000 of 10,000");
     expect(text).toContain("80%");
     expect(text).toMatch(/days? left/i);
+  });
+
+  it("names the billing period and the exact time of the data", () => {
+    const text = usageText({ kind: "ok", breakdown: calcBreakdown(normalizeUsage(usage), NOW) });
+    expect(text).toContain("Billing period: 1 Oct to 1 Nov.");
+    expect(text).toContain("Data as of 2026-10-22 06:00 UTC.");
+  });
+
+  it("says the numbers are plan usage, not invoice amounts", () => {
+    const text = usageText({ kind: "ok", breakdown: calcBreakdown(normalizeUsage(usage), NOW) });
+    expect(text).toMatch(/invoice amounts are not visible/i);
+  });
+
+  it("leaves out the billing period when Klaviyo did not send its dates", () => {
+    const withoutPeriod = { data: [{ ...usage.data[0], attributes: { ...usage.data[0].attributes, period_start: undefined } }] };
+    const text = usageText({ kind: "ok", breakdown: calcBreakdown(normalizeUsage(withoutPeriod), NOW) });
+    expect(text).not.toContain("Billing period");
   });
 
   it("asks to connect again, without any numbers, when sign-in is not finished", () => {

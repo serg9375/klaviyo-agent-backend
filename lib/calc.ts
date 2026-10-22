@@ -32,6 +32,8 @@ export type Breakdown =
       dataAgeHours: number;
       stale: boolean;
       asOf: string;
+      periodStart: string;
+      periodEnd: string;
       notes: string[];
     }
   | { ok: false; reason: "no_active_profiles" | "no_data"; message: string };
@@ -140,6 +142,8 @@ export function calcBreakdown(items: UsageItem[], now: Date): Breakdown {
     dataAgeHours,
     stale,
     asOf: active.asOf,
+    periodStart: active.periodStart,
+    periodEnd: active.periodEnd,
     notes,
   };
 }

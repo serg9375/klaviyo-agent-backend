@@ -32,13 +32,34 @@ export function startText(connectUrl: string, sessionId: string): string {
   ].join("\n");
 }
 
+const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const ISO_MINUTES_LENGTH = "2026-10-22T06:00".length;
+const NO_INVOICE_NOTE = "These are plan usage numbers only. Invoice amounts are not visible here.";
+
+const formatDay = (iso: string) => MONTH_FORMAT.format(new Date(iso));
+
+// Klaviyo sometimes omits the dates; a missing period is left out rather than shown as "Invalid Date".
+function periodLine(breakdown: { periodStart: string; periodEnd: string }): string[] {
+  const hasDates = Number.isFinite(Date.parse(breakdown.periodStart)) && Number.isFinite(Date.parse(breakdown.periodEnd));
+  return hasDates ? [`Billing period: ${formatDay(breakdown.periodStart)} to ${formatDay(breakdown.periodEnd)}.`] : [];
+}
+
+// An exact time, because "about 0 hours ago" reads like a defect.
+function dataTimeLine(asOf: string): string[] {
+  if (!Number.isFinite(Date.parse(asOf))) return [];
+  const stamp = new Date(asOf).toISOString().slice(0, ISO_MINUTES_LENGTH).replace("T", " ");
+  return [`Data as of ${stamp} UTC.`];
+}
+
 function breakdownText(breakdown: Breakdown): string {
   if (!breakdown.ok) return breakdown.message;
   return [
     ...breakdown.items.map((item) => item.line),
+    ...periodLine(breakdown),
     `Days left in this billing period: ${breakdown.daysLeft}.`,
-    `Data last updated about ${breakdown.dataAgeHours} hours ago.`,
+    ...dataTimeLine(breakdown.asOf),
     ...breakdown.notes,
+    NO_INVOICE_NOTE,
   ].join("\n");
 }
 
