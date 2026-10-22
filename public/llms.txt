@@ -1,0 +1,6 @@
+# Klaviyo billing connector
+
+> Read-only tools that explain a Klaviyo bill in plain numbers (percent of limit, room left, days left, what counts as billable). Demo data works without any account; live data uses Klaviyo OAuth with the usage:read scope.
+
+- Remote MCP server (Streamable HTTP, no auth on the endpoint): https://klaviyo-agent-backend.vercel.app/mcp
+- OpenAPI 3.1 description of the same tools: https://klaviyo-agent-backend.vercel.app/openapi.json
