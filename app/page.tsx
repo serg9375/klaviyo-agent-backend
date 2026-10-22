@@ -15,7 +15,7 @@ const DETAILS = [
   },
   {
     question: "Is it safe?",
-    answer: "It can only read. You sign in on Klaviyo's own page, so your password never goes to the assistant. To stop, tell the assistant: disconnect.",
+    answer: "It can only read. You sign in on Klaviyo's own page, so your password never goes to the assistant. To stop, tell the assistant: disconnect. You can also remove the app yourself in your Klaviyo account settings.",
   },
   {
     question: "Something went wrong",
