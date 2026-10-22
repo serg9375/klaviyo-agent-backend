@@ -40,3 +40,10 @@ describe("onboarding sentence", () => {
     expect(instructions).not.toMatch(/demo|sample data/i);
   });
 });
+
+describe("not-found page", () => {
+  it("points a lost assistant to llms.txt", async () => {
+    const { default: NotFound } = await import("../app/not-found");
+    expect(renderToStaticMarkup(createElement(NotFound))).toContain("/llms.txt");
+  });
+});
