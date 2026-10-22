@@ -8,15 +8,11 @@ export const MCP_TOOLS = [
   {
     name: "get_usage",
     description:
-      "Read billing usage and get a ready breakdown (percent of limit, room left, days left, data age). Use source demo for sample data or live for the merchant's connected account.",
+      "Read the merchant's connected account and get a ready breakdown (percent of limit, room left, days left, data age). Real data only; connect first.",
     inputSchema: {
       type: "object",
-      properties: {
-        source: { type: "string", enum: ["demo", "live"] },
-        fixture: { type: "string", enum: ["under-cap", "at-cap", "after-cleanup"], description: "Demo only." },
-        session_id: { type: "string", description: "Live only. Returned by connect_link." },
-      },
-      required: ["source"],
+      properties: { session_id: { type: "string", description: "Returned by connect_link." } },
+      required: ["session_id"],
     },
   },
   {

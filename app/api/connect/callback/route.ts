@@ -3,8 +3,8 @@ import { liveDeps } from "@/lib/deps";
 import { logError } from "@/lib/log";
 
 const MESSAGES = {
-  connected: ["Connected", "You can go back to your chat. This page can be closed."],
-  denied: ["Nothing was connected", "You chose not to allow access. You can keep using the sample numbers."],
+  connected: ["Connected", "Go back to your chat and tell your assistant: done. You can close this page."],
+  denied: ["Nothing was connected", "You chose not to allow access, so there is nothing to show yet. Go back to your chat if you change your mind."],
   expired: ["That link expired", "Go back to your chat and ask to connect again."],
   invalid: ["That link is not valid", "Go back to your chat and ask to connect again."],
   error: ["Something went wrong", "Nothing was connected. Go back to your chat and try again."],
