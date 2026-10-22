@@ -47,7 +47,14 @@ const LABELS: Record<string, string> = {
   active_profiles: "contacts you can email",
   email_sends: "emails sent",
   sms_credits: "text message credits",
+  reviews_orders: "review orders",
+  k_social_active_profiles: "social contacts",
+  customer_hub_active_profiles: "customer hub contacts",
+  ai_credits: "AI credits",
 };
+
+// The skill promises never to state dollar amounts, so money-denominated items are not reported.
+const MONEY_UNIT = "USD";
 
 const UNIT_WORDS: Record<string, string> = {
   profiles: "contacts",
@@ -128,7 +135,7 @@ export function calcBreakdown(items: UsageItem[], now: Date): Breakdown {
 
   return {
     ok: true,
-    items: items.map(describe),
+    items: items.filter((i) => i.unit !== MONEY_UNIT).map(describe),
     daysLeft,
     dataAgeHours,
     stale,

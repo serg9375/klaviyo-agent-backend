@@ -67,6 +67,33 @@ describe("calcBreakdown", () => {
     expect(r.daysLeft).toBe(0);
   });
 
+  it("never states a dollar amount: items measured in USD are left out", () => {
+    const r = calcBreakdown(
+      normalizeUsage([
+        { id: "active_profiles", usage_used: 0, usage_max: 250, unit: "profiles", period_end: "2026-11-01T00:00:00Z" },
+        { id: "sms_credits", usage_used: 0, usage_max: 5, unit: "USD" },
+      ]),
+      new Date("2026-10-22T00:00:00Z"),
+    );
+    if (!r.ok) throw new Error("expected ok");
+    expect(r.items.map((i) => i.id)).toEqual(["active_profiles"]);
+    expect(JSON.stringify(r)).not.toMatch(/USD|\$/);
+  });
+
+  it("uses plain merchant words for every item a live account reports", () => {
+    const ids = ["reviews_orders", "k_social_active_profiles", "customer_hub_active_profiles", "ai_credits"];
+    const r = calcBreakdown(
+      normalizeUsage([
+        { id: "active_profiles", usage_used: 0, usage_max: 250, unit: "profiles" },
+        ...ids.map((id) => ({ id, usage_used: 0, usage_max: 10, unit: "profiles" })),
+      ]),
+      new Date("2026-10-22T00:00:00Z"),
+    );
+    if (!r.ok) throw new Error("expected ok");
+    const labels = r.items.filter((i) => ids.includes(i.id)).map((i) => i.label);
+    expect(labels).toEqual(["review orders", "social contacts", "customer hub contacts", "AI credits"]);
+  });
+
   it("accepts flat items as well as wrapped ones", () => {
     const items = normalizeUsage([{ id: "active_profiles", usage_used: 1, usage_max: 2, unit: "profiles" }]);
     expect(items[0]).toMatchObject({ id: "active_profiles", used: 1, max: 2 });
