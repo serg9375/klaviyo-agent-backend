@@ -69,5 +69,6 @@ export function upstashStore(redis: Redis): Store {
 }
 
 export function defaultStore(): Store {
-  return upstashStore(Redis.fromEnv());
+  // Upstash parses JSON-looking strings by default, which breaks our own JSON.parse on read.
+  return upstashStore(Redis.fromEnv({ automaticDeserialization: false }));
 }
