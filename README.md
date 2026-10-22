@@ -4,9 +4,10 @@ Hosted OAuth connector and tools API for the "explain Klaviyo billing in numbers
 
 ## Routes
 - `POST /api/connect/start`, `GET /api/connect/callback`: Klaviyo OAuth connect flow
+- `GET /api/start`, `GET /api/usage?session=`: plain-text versions of connect and usage for assistants that can only open web addresses (real account data only, no sample mode)
 - `POST /api/disconnect`: revoke and delete stored tokens
 - `POST /api/tools/usage`, `POST /api/tools/rule`: tools the agent calls
-- `POST /mcp`: the same tools as a stateless remote MCP server (Streamable HTTP); `GET /openapi.json`: OpenAPI 3.1 description; `/llms.txt`: discovery summary for agents
+- `POST /mcp`: the same tools as a stateless remote MCP server (Streamable HTTP); `GET /openapi.json`: OpenAPI 3.1 description; `/llms.txt`: step-by-step instructions an assistant follows after a merchant pastes the one-sentence prompt shown on `/`
 
 ## Deploy on Vercel
 1. Import this repo; framework is detected as Next.js.

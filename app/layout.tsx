@@ -1,9 +1,20 @@
-export const metadata = { title: "Billing connector" };
+import "./styles.css";
+
+const DESCRIPTION = "Paste one sentence into your assistant and it explains your Klaviyo bill in plain words.";
+
+export const metadata = {
+  title: "Understand your Klaviyo bill",
+  description: DESCRIPTION,
+  openGraph: { title: "Understand your Klaviyo bill", description: DESCRIPTION },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ font: "16px system-ui, sans-serif", padding: 16 }}>{children}</body>
+      <head>
+        <link rel="llms.txt" href="/llms.txt" />
+      </head>
+      <body>{children}</body>
     </html>
   );
 }

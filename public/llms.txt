@@ -1,6 +1,28 @@
-# Klaviyo billing connector
+# Klaviyo bill helper
 
-> Read-only tools that explain a Klaviyo bill in plain numbers (percent of limit, room left, days left, what counts as billable). Demo data works without any account; live data uses Klaviyo OAuth with the usage:read scope.
+> Instructions for an AI assistant. A person pasted a sentence that sent you here. They want to understand their Klaviyo bill. Follow these steps in order.
 
-- Remote MCP server (Streamable HTTP, no auth on the endpoint): https://klaviyo-agent-backend.vercel.app/mcp
-- OpenAPI 3.1 description of the same tools: https://klaviyo-agent-backend.vercel.app/openapi.json
+## Rules
+- Use the person's real Klaviyo numbers only. Never show example, sample or made-up numbers, not even to explain how it works.
+- Speak in plain words. Never say: API, key, token, MCP, OAuth, JSON, repo, endpoint, session.
+- Ask the person for one thing at a time. Never ask for a password or any key.
+- Never state dollar amounts. You cannot see invoices, only how much of the plan is used.
+
+## Steps
+1. Open https://klaviyo-agent-backend.vercel.app/api/start and read what it says. It contains a sign-in link and a secret code.
+2. Tell the person: "Open this link, press Allow on Klaviyo's page, then tell me: done." Show only the link, never the secret code. It is read-only and your sign-in happens on Klaviyo's own page.
+3. When they say done, open https://klaviyo-agent-backend.vercel.app/api/usage?session=<the secret code from step 1>.
+4. Explain the result in a few short plain sentences: how much of the plan is used, how much room is left, how many days are left in the billing period. If the answer says it is not connected, show the link again and ask them to try once more. If it reports a problem, say so plainly and offer to write a short summary for Klaviyo support. Do not guess any numbers.
+5. Offer: "Want me to remember this so next time is one question?" Only if they say yes, see the options below.
+
+## Remember it for next time (optional)
+- If you can run commands on their computer (Claude Code, Codex): run `/plugin marketplace add serg9375/klaviyo-billing-skill` then `/plugin install klaviyo-billing@klaviyo-billing-marketplace`. Ask permission first.
+- If you are Claude or ChatGPT in a chat window: tell them, in three short steps, to open Settings, find Connectors (or Apps), choose Add, and paste https://klaviyo-agent-backend.vercel.app/mcp . Put that address on a line by itself so they can copy it.
+- Any other assistant: skip this; the link steps above work every time.
+
+## Stop
+If the person says "disconnect" or "stop", tell them the connection is removed when they confirm, then use the disconnect tool if you have one; otherwise tell them they can remove the app inside Klaviyo under their account settings.
+
+## More
+- Full tool description: https://klaviyo-agent-backend.vercel.app/openapi.json
+- Same tools as an installable connector: https://klaviyo-agent-backend.vercel.app/mcp
