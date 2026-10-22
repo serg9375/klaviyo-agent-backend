@@ -1,5 +1,6 @@
 import type { Breakdown } from "./calc";
 import type { UsageResult } from "./connector";
+import { RULES, explainRule } from "./rules";
 
 // Plain-text answers for assistants that can only open web addresses. Every reply is
 // written so the assistant can relay it to a merchant without technical words.
@@ -65,4 +66,11 @@ function breakdownText(breakdown: Breakdown): string {
 
 export function usageText(result: { kind: "ok"; breakdown: Breakdown } | { kind: NotOkUsage }): string {
   return result.kind === "ok" ? breakdownText(result.breakdown) : PROBLEM_MESSAGES[result.kind];
+}
+
+// Says where the rule comes from so the assistant does not present it as its own knowledge.
+export function ruleText(topic: string): string {
+  const rule = explainRule(topic);
+  if (!rule) return `Unknown topic. Use one of: ${Object.keys(RULES).join(", ")}.`;
+  return `${rule.text}\nThis rule comes from Klaviyo's help pages: ${rule.source}`;
 }

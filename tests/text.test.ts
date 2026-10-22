@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calcBreakdown, normalizeUsage } from "../lib/calc";
-import { startText, usageText } from "../lib/text";
+import { ruleText, startText, usageText } from "../lib/text";
 
 const BANNED_WORDS = /\b(api|token|mcp|oauth|json|demo|sample)\b/i;
 
@@ -79,5 +79,18 @@ describe("usageText", () => {
   it("says plainly when the account has no usable billing data", () => {
     const breakdown = calcBreakdown([], NOW);
     expect(usageText({ kind: "ok", breakdown })).toContain("No billing usage");
+  });
+});
+
+describe("ruleText", () => {
+  it("gives the rule, says it comes from Klaviyo's help pages, and links the source", () => {
+    const text = ruleText("count_delay");
+    expect(text).toMatch(/72 hours/);
+    expect(text).toMatch(/Klaviyo's help pages/);
+    expect(text).toContain("https://help.klaviyo.com/");
+  });
+
+  it("lists the known topics when the topic is unknown, so the assistant can retry", () => {
+    expect(ruleText("nope")).toContain("emailable_counts");
   });
 });
