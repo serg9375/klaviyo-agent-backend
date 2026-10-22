@@ -8,6 +8,6 @@ export async function POST(request: Request) {
   if (!body.session_id) return Response.json({ error: "bad_request" }, { status: 400 });
 
   const result = await getUsage(liveDeps(), body.session_id);
-  if (result.kind !== "ok") return Response.json({ status: result.kind }, { status: result.kind === "not_connected" ? 401 : 200 });
+  if (result.kind !== "ok") return Response.json({ status: result.kind }, { status: result.kind === "not_connected" || result.kind === "waiting_for_allow" ? 401 : 200 });
   return Response.json({ status: "ok", breakdown: calcBreakdown(normalizeUsage(result.raw), new Date()) });
 }

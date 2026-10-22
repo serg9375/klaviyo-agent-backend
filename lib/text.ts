@@ -1,5 +1,5 @@
 import type { Breakdown } from "./calc";
-import type { UsageResult } from "./connector";
+import { STATE_TTL_SECONDS, type UsageResult } from "./connector";
 import { RULES, explainRule } from "./rules";
 
 // Plain-text answers for assistants that can only open web addresses. Every reply is
@@ -8,8 +8,10 @@ import { RULES, explainRule } from "./rules";
 type NotOkUsage = Exclude<UsageResult["kind"], "ok">;
 
 const PROBLEM_MESSAGES: Record<NotOkUsage, string> = {
+  waiting_for_allow:
+    "The user has not pressed Allow yet. Ask them to open the same sign-in link and press Allow, then tell you 'done'. Do not give any numbers until then.",
   not_connected:
-    "Not connected yet. Ask the user to open the sign-in link and press Allow, then try again. Do not give any numbers until then.",
+    "Not connected. The sign-in link has timed out or was never started. Start over from the beginning to get a fresh sign-in link and show it to the user. Do not give any numbers.",
   needs_reauth:
     "The connection to Klaviyo ended. Ask the user to start over from the beginning to sign in again. Do not give any numbers.",
   forbidden:
@@ -25,6 +27,8 @@ export function startText(connectUrl: string, sessionId: string): string {
     "",
     `Sign-in link: ${connectUrl}`,
     "",
+    `The link works for ${LINK_MINUTES} minutes and only once. If it times out, start over from the beginning for a fresh one.`,
+    "",
     "Then ask the user to tell you 'done'. Keep this code for the next step (do not show it to the user):",
     `Session code: ${sessionId}`,
     "",
@@ -34,6 +38,8 @@ export function startText(connectUrl: string, sessionId: string): string {
 }
 
 const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const SECONDS_PER_MINUTE = 60;
+const LINK_MINUTES = STATE_TTL_SECONDS / SECONDS_PER_MINUTE;
 const ISO_MINUTES_LENGTH = "2026-10-22T06:00".length;
 const NO_INVOICE_NOTE = "These are plan usage numbers only. Invoice amounts are not visible here.";
 

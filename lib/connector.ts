@@ -34,7 +34,7 @@ interface MerchantRecord {
   lastUsedAt: number;
 }
 
-const STATE_TTL_SECONDS = 600;
+export const STATE_TTL_SECONDS = 600;
 const MAX_429_RETRIES = 2;
 const REFRESH_LOCK_TTL_SECONDS = 10;
 const LOCK_WAIT_MS = 500;
@@ -44,7 +44,10 @@ const DEFAULT_RETRY_AFTER_SECONDS = 1;
 const MS_PER_SECOND = 1000;
 
 // The session id is a bearer held by the assistant. Only its hash is used as a storage key.
-const merchantKey = (sessionId: string) => `merchant:${createHash("sha256").update(sessionId).digest("hex")}`;
+const hashSession = (sessionId: string) => createHash("sha256").update(sessionId).digest("hex");
+const merchantKey = (sessionId: string) => `merchant:${hashSession(sessionId)}`;
+// Lives as long as the sign-in link, so "link not used yet" can be told apart from "start over".
+const pendingKey = (sessionId: string) => `pending:${hashSession(sessionId)}`;
 
 async function load(deps: Deps, sessionId: string): Promise<MerchantRecord | null> {
   const raw = await deps.store.get(merchantKey(sessionId));
@@ -58,6 +61,7 @@ export async function startConnect(deps: Deps): Promise<{ connectUrl: string; se
   const state = randomToken();
   const { verifier, challenge } = pkcePair();
   await deps.store.set(`state:${state}`, JSON.stringify({ verifier, sessionId }), STATE_TTL_SECONDS);
+  await deps.store.set(pendingKey(sessionId), "1", STATE_TTL_SECONDS);
   return { connectUrl: authorizeUrl(deps.config, state, challenge), sessionId };
 }
 
@@ -75,9 +79,10 @@ export async function handleCallback(
   if (!params.state) return { kind: "invalid" };
   const raw = await deps.store.take(`state:${params.state}`); // single use
   if (!raw) return { kind: "invalid" };
+  const { verifier, sessionId } = JSON.parse(raw) as { verifier: string; sessionId: string };
+  await deps.store.del(pendingKey(sessionId));
   if (params.error === "access_denied") return { kind: "denied" };
   if (params.error || !params.code) return { kind: "error" };
-  const { verifier, sessionId } = JSON.parse(raw) as { verifier: string; sessionId: string };
   try {
     const tokens = await exchangeCode(deps.config, params.code, verifier, deps.fetch);
     const now = deps.now();
@@ -100,7 +105,8 @@ export async function handleCallback(
 
 export type UsageResult =
   | { kind: "ok"; raw: unknown }
-  | { kind: "not_connected" }
+  | { kind: "not_connected" } // never started, link expired, or already disconnected
+  | { kind: "waiting_for_allow" } // link issued, Allow not pressed yet
   | { kind: "needs_reauth" }
   | { kind: "forbidden" } // scope missing (403)
   | { kind: "not_found" }
@@ -174,7 +180,7 @@ async function fetchUsage(deps: Deps, sessionId: string, initial: MerchantRecord
 
 export async function getUsage(deps: Deps, sessionId: string): Promise<UsageResult> {
   const record = await load(deps, sessionId);
-  if (!record) return { kind: "not_connected" };
+  if (!record) return (await deps.store.get(pendingKey(sessionId))) ? { kind: "waiting_for_allow" } : { kind: "not_connected" };
   if (record.status === "needs_reauth" || !record.accessEnc || !record.refreshEnc) return { kind: "needs_reauth" };
   try {
     return await fetchUsage(deps, sessionId, record);

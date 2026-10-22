@@ -100,6 +100,24 @@ describe("handleCallback", () => {
     expect((await handleCallback(s.d, { code: "c", state })).kind).toBe("invalid");
   });
 
+  it("a started sign-in that nobody finished yet is waiting_for_allow", async () => {
+    const s = setup(() => json(200, {}));
+    const { sessionId } = await startConnect(s.d);
+    expect((await getUsage(s.d, sessionId)).kind).toBe("waiting_for_allow");
+  });
+
+  it("a sign-in link left unused for 10 minutes goes back to not_connected", async () => {
+    vi.useFakeTimers();
+    try {
+      const s = setup(() => json(200, {}));
+      const { sessionId } = await startConnect(s.d);
+      vi.advanceTimersByTime(601_000);
+      expect((await getUsage(s.d, sessionId)).kind).toBe("not_connected");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("expired state (after 10 minutes) is invalid", async () => {
     vi.useFakeTimers();
     try {

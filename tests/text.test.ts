@@ -60,13 +60,27 @@ describe("usageText", () => {
     expect(text).not.toContain("Billing period");
   });
 
+  it("tells the assistant to wait for Allow, not to restart, when sign-in is pending", () => {
+    const text = usageText({ kind: "waiting_for_allow" });
+    expect(text).toMatch(/press Allow/i);
+    expect(text).not.toMatch(/start (again|over)/i);
+  });
+
+  it("tells the assistant to start over when the link or code is no longer valid", () => {
+    expect(usageText({ kind: "not_connected" })).toMatch(/start over from the beginning/i);
+  });
+
   it("asks to connect again, without any numbers, when sign-in is not finished", () => {
     const text = usageText({ kind: "not_connected" });
     expect(text).toMatch(/not connected/i);
     expect(text).not.toMatch(/\d{2,}/);
   });
 
-  it.each(["needs_reauth", "forbidden", "not_found", "rate_limited", "error"] as const)(
+  it("states how long the sign-in link works", () => {
+    expect(startText("https://klaviyo.example/a", "S")).toMatch(/10 minutes/);
+  });
+
+  it.each(["waiting_for_allow", "needs_reauth", "forbidden", "not_found", "rate_limited", "error"] as const)(
     "gives a plain-words message for %s and never invents numbers",
     (kind) => {
       const text = usageText({ kind });

@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   try {
     const result = await getUsage(liveDeps(), sessionId);
     const text = result.kind === "ok" ? usageText({ kind: "ok", breakdown: calcBreakdown(normalizeUsage(result.raw), new Date()) }) : usageText({ kind: result.kind });
-    return new Response(text, { status: result.kind === "not_connected" ? 401 : 200, headers: TEXT_HEADERS });
+    return new Response(text, { status: result.kind === "not_connected" || result.kind === "waiting_for_allow" ? 401 : 200, headers: TEXT_HEADERS });
   } catch (error) {
     logError("api usage", {}, error);
     return new Response(NOT_CONFIGURED, { status: 503, headers: TEXT_HEADERS });
