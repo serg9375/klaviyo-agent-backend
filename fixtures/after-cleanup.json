@@ -1,0 +1,8 @@
+{
+  "company": "Willow Tea Co (demo)",
+  "now": "2026-10-22T12:00:00Z",
+  "note": "Merchant suppressed about 3,000 contacts yesterday; the reading is old, so the count may not show it yet.",
+  "data": [
+    { "type": "billing-usage", "id": "active_profiles", "attributes": { "usage_used": 14900, "usage_max": 15000, "unit": "profiles", "period_start": "2026-10-10T00:00:00Z", "period_end": "2026-11-10T00:00:00Z", "as_of": "2026-10-20T18:00:00Z" } }
+  ]
+}
